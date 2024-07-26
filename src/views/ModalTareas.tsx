@@ -12,6 +12,13 @@ interface CrearTarea {
   usuarioId: number;
 }
 
+interface EditarTarea {
+  id: number;
+  titulo?: string;
+  descripcion?: string;
+  completado?: boolean;
+}
+
 const initialForm = {
   titulo: "",
   descripcion: "",
@@ -64,6 +71,13 @@ function ModalTareas({
     }
   };
 
+  const handleCompletoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setForm({
+      ...form,
+      completado: e.target.value === "1",
+    });
+  };
+
   const validateForm = () => {
     const newErrors = { ...initialErrors };
     let isValid = true;
@@ -91,7 +105,17 @@ function ModalTareas({
 
   const editarTareaBD = async (tarea: Partial<Tarea>) => {
     try {
-      const tareaBD = await tareaController.actualizarTarea(tarea.id!, tarea);
+      const tareaEditada: EditarTarea = {
+        id: tarea.id!,
+        titulo: tarea.titulo,
+        descripcion: tarea.descripcion,
+        completado: tarea.completado,
+      };
+
+      const tareaBD = await tareaController.actualizarTarea(
+        tarea.id!,
+        tareaEditada
+      );
       setTareas((prevTareas) =>
         prevTareas.map((t) => (t.id === tareaBD.id ? tareaBD : t))
       );
@@ -171,11 +195,11 @@ function ModalTareas({
             <select
               className="bg-[#F1F4F9] border-[#D8D8D8] border rounded-lg p-2 mt-3"
               name="completado"
-              onChange={handleChange}
-              value={form.completado ? "Completado" : "Por completar"}
+              onChange={handleCompletoChange}
+              value={form.completado ? "1" : "0"}
             >
-              <option value="false">Por Completar</option>
-              <option value="true">Completado</option>
+              <option value="0">Por Completar</option>
+              <option value="1">Completado</option>
             </select>
           </div>
 

@@ -8,6 +8,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { jwtDecode } from "jwt-decode";
 
 type AuthState = {
   token: string | null;
@@ -49,6 +50,17 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   }
 };
 
+const isTokenExpired = (token: string) => {
+  try {
+    const decoded: any = jwtDecode(token);
+    const currentTime = Date.now() / 1000;
+    return decoded.exp < currentTime;
+  } catch (error) {
+    console.error("Failed to decode token", error);
+    return true;
+  }
+};
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -61,14 +73,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     if (userString) {
       try {
         const user = JSON.parse(userString);
-        dispatch({ type: "SET_AUTH", payload: user });
+        if (isTokenExpired(user.token)) {
+          dispatch({ type: "LOGOUT" });
+        } else {
+          dispatch({ type: "SET_AUTH", payload: user });
+        }
       } catch (error) {
         console.error("Failed to parse user from localStorage", error);
       }
     }
   }, []);
 
-  // Render nothing if not mounted on client
+  useEffect(() => {
+    if (state.token) {
+      const interval = setInterval(() => {
+        if (isTokenExpired(state.token!)) {
+          dispatch({ type: "LOGOUT" });
+          clearInterval(interval);
+          localStorage.removeItem("user");
+        }
+      }, 60000);
+
+      return () => clearInterval(interval);
+    }
+  }, [state.token]);
+
   if (!isClient) return null;
 
   return (
