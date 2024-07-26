@@ -27,4 +27,20 @@ export default class UsuarioController {
       throw new Error((error as any).response.data.message);
     }
   }
+
+  public async signup(
+    username: string,
+    password: string
+  ): Promise<respuestaLogin> {
+    try {
+      await this.usuarioAPI.post("/signup", {
+        username,
+        password,
+      });
+      const usuario = await this.login(username, password);
+      return usuario;
+    } catch (error) {
+      throw new Error((error as any).response.data.message);
+    }
+  }
 }

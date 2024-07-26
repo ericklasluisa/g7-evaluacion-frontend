@@ -5,7 +5,7 @@ import Tarea from "@/models/tarea";
 import { useState } from "react";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import ModalTareas from "./ModalTareas";
-import ModalEliminarTarea from "./ModalEliminarTarea";
+import ModalEliminarTarea from "@/views/ModalEliminarTarea";
 
 function Tareas({
   tareas,
